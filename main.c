@@ -74,7 +74,7 @@ static int	init(t_data *data, t_philo *philos, int argc, char **argv)
 {
 	if (parse_arguments(argc, argv, data) == 1)
 		return (1);
-	// Initialize mutexes, philosophers, and other necessary data here
+	// Initialize mutexes, philosophers, and other necessary
 	if (init_philos(data, &philos) == 1)
 	{
 		free_all(data, philos);
