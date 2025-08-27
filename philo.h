@@ -6,14 +6,13 @@
 /*   By: muokcan <muokcan@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 17:09:15 by muokcan           #+#    #+#             */
-/*   Updated: 2025/08/26 18:35:37 by muokcan          ###   ########.fr       */
+/*   Updated: 2025/08/27 19:26:43 by muokcan          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILO_H
 # define PHILO_H
 
-#include <complex.h>
 # include <pthread.h>
 
 typedef struct s_data
