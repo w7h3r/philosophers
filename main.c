@@ -13,7 +13,7 @@
 #include "philo.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
+#include <sys/time.h>
 
 static int	parse_arguments(int argc, char **argv, t_data *data)
 {
@@ -47,6 +47,11 @@ void	free_mutexes(t_data *data)
 	pthread_mutex_destroy(&data->death_mutex);
 }
 
+int	philo_routine(t_philo philo, t_data *data)
+{
+	return (0);
+}
+
 void	free_philos(t_philo *philos)
 {
 	t_philo	*temp;
@@ -67,6 +72,55 @@ void	free_all(t_data *data, t_philo *philos)
 
 int	init_philos(t_data *data, t_philo **philo)
 {
+	int	i;
+
+	*philo = malloc(sizeof(t_philo) * data->philosopher_num);
+	if (!*philo)
+		return (1);
+	i = 0;
+	while (i < data->philosopher_num)
+	{
+		(*philo)[i].id = i + 1;
+		(*philo)[i].times_ate = 0;
+		(*philo)[i].left_fork = i;
+		(*philo)[i].right_fork = (i + 1) % data->philosopher_num;
+		(*philo)[i].data = data;
+		(*philo)[i].last_meal_time = 0;
+		i++;
+	}
+	return (0);
+}
+
+void	destroy_forks(t_data *data)
+{
+	int	i;
+
+	i = 0;
+	while (i < data->philosopher_num)
+	{
+		pthread_mutex_destroy(&data->forks[i]);
+		i++;
+	}
+	free(data->forks);
+}
+
+int	init_forks(t_data *data)
+{
+	int	i;
+
+	data->forks = malloc(sizeof(pthread_mutex_t) * data->philosopher_num);
+	if (!data->forks)
+		return (1);
+	i = 0;
+	while (i < data->philosopher_num)
+	{
+		if (pthread_mutex_init(&data->forks[i], NULL) != 0)
+		{
+			destroy_forks(data);
+			return (1);
+		}
+		i++;
+	}
 	return (0);
 }
 
@@ -75,6 +129,11 @@ static int	init(t_data *data, t_philo *philos, int argc, char **argv)
 	if (parse_arguments(argc, argv, data) == 1)
 		return (1);
 	// Initialize mutexes, philosophers, and other necessary
+	if (init_forks(data) == 1)
+	{
+		free_all(data, philos);
+		return (1);
+	}
 	if (init_philos(data, &philos) == 1)
 	{
 		free_all(data, philos);
