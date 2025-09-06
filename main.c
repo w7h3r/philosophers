@@ -12,6 +12,7 @@
 
 #include "philo.h"
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <sys/time.h>
 
@@ -37,18 +38,50 @@ static int	parse_arguments(int argc, char **argv, t_data *data)
 
 void	free_mutexes(t_data *data)
 {
+	int	i;
+
 	if (data->forks)
 	{
-		for (int i = 0; i < data->philosopher_num; i++)
-			pthread_mutex_destroy(&data->forks[i]);
+		i = 0;
+		while (i < data->philosopher_num)
+			pthread_mutex_destroy(&data->forks[i++]);
 		free(data->forks);
 	}
 	pthread_mutex_destroy(&data->print_mutex);
 	pthread_mutex_destroy(&data->death_mutex);
 }
 
+long long	get_time(void)
+{
+	struct timeval	tv;
+
+	gettimeofday(&tv, NULL);
+	return ((tv.tv_sec * 1000) + (tv.tv_usec / 1000));
+}
+
 int	philo_routine(t_philo philo, t_data *data)
 {
+	while (data->life == 0)
+		usleep(100);
+	philo.last_meal_time = get_time();
+	while (data->life)
+	{
+		// Eating
+		printf("Philosopher %d is eating\n", philo.id);
+		philo.last_meal_time = get_time();
+		philo.times_ate++;
+		printf("Philosopher %d has eaten %d times\n", philo.id, philo.times_ate);
+		pthread_mutex_unlock(&data->forks[philo.right_fork]);
+		pthread_mutex_unlock(&data->forks[philo.left_fork]);
+
+		// Thinking
+		printf("Philosopher %d is thinking\n", philo.id);
+		pthread_mutex_lock(&data->forks[philo.left_fork]);
+		pthread_mutex_lock(&data->forks[philo.right_fork]);
+		
+		
+		// Sleeping
+	}
 	return (0);
 }
 
@@ -66,8 +99,10 @@ void	free_philos(t_philo *philos)
 
 void	free_all(t_data *data, t_philo *philos)
 {
-	free_mutexes(data);
-	free_philos(philos);
+	if (data)
+		free_mutexes(data);
+	if (philos)
+		free_philos(philos);
 }
 
 int	init_philos(t_data *data, t_philo **philo)
@@ -86,6 +121,12 @@ int	init_philos(t_data *data, t_philo **philo)
 		(*philo)[i].right_fork = (i + 1) % data->philosopher_num;
 		(*philo)[i].data = data;
 		(*philo)[i].last_meal_time = 0;
+		(*philo)[i].next = (i == data->philosopher_num - 1) ? NULL : &(*philo)[i + 1];
+		{
+			free_philos(*philo);
+			return (1);
+		}
+		philo_routine((*philo)[i], data);
 		i++;
 	}
 	return (0);
@@ -124,27 +165,35 @@ int	init_forks(t_data *data)
 	return (0);
 }
 
-static int	init(t_data *data, t_philo *philos, int argc, char **argv)
+static int	init(t_data *data, t_philo **philos, int argc, char **argv)
 {
 	if (parse_arguments(argc, argv, data) == 1)
 		return (1);
-	// Initialize mutexes, philosophers, and other necessary
+	data->someone_died = 0;
+	data->all_ate = 0;
+	data->start_time = get_time();
 	if (init_forks(data) == 1)
 	{
-		free_all(data, philos);
+		free_all(data, NULL);
 		return (1);
 	}
-	if (init_philos(data, &philos) == 1)
+	if (init_philos(data, philos) == 1)
 	{
-		free_all(data, philos);
+		free_all(data, *philos);
 		return (1);
 	}
+	if (pthread_mutex_init(&data->print_mutex, NULL) != 0)
+	{
+		free_all(data, *philos);
+		return (1);
+	}
+	if (pthread_mutex_init(&data->death_mutex, NULL) != 0)
+	{
+		free_all(data, *philos);
+		return (1);
+	}
+	data->life = 1;
 	return (0);
-}
-
-long	get_time(void)
-{
-	
 }
 
 int	main(int argc, char **argv)
@@ -154,12 +203,26 @@ int	main(int argc, char **argv)
 
 	if (argc < 5 || argc > 6)
 	{
-		printf("Error: Invalid number of arguments\n");
+		printf("Error: Invalid number of arguments\nUsage: ./philo philo_number time_to_die time_to_eat time_to_sleep [number_of_times_each_philosopher_must_eat]\n");
 		return (1);
 	}
-	if (init(&data, philos, argc, argv) == 1)
+	if (init(&data, &philos, argc, argv) == 1)
 		return (1);
-	start_simulation();
-	free_all();
+	while (data.life == 1)
+	{
+		while (philos)
+		{
+			if (get_time() - philos->last_meal_time > data.time_to_die)
+			{
+				pthread_mutex_lock(&data.print_mutex);
+				printf("Philosopher %d died\n", philos->id);
+				data.life = 0;
+				pthread_mutex_unlock(&data.print_mutex);
+				break ;
+			}
+			philos = philos->next;
+		}
+	}
+	free_all(&data, philos);
 	return (0);
 }

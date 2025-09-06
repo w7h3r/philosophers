@@ -1,7 +1,8 @@
 NAME= philo
 CC= cc
 CFLAGS= -Wall -Wextra -Werror -g
-SRC= main.c \
+SRC= main.c		\
+	 philo_atoi.c	\
 
 OBJ= $(SRC:.c=.o)
 

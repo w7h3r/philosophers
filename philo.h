@@ -17,7 +17,7 @@
 
 typedef struct s_data
 {
-	int				sim_start;
+	int				life;
 	int				philosopher_num;
 	int				time_to_die;
 	int				time_to_eat;
