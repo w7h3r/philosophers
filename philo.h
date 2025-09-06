@@ -26,6 +26,7 @@ typedef struct s_data
 	long long		start_time;
 	int				all_ate;
 	int				someone_died;
+	struct s_philo	*philos;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	print_mutex;
 	pthread_mutex_t	death_mutex;
