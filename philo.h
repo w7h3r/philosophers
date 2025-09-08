@@ -25,7 +25,6 @@ typedef struct s_data
 	int				philosopher_must_eat_num;
 	long long		start_time;
 	int				all_ate;
-	int				someone_died;
 	struct s_philo	*philos;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	print_mutex;
