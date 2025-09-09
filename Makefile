@@ -1,6 +1,7 @@
 NAME= philo
 CC= cc
-CFLAGS= -Wall -Wextra -Werror -g
+CFLAGS= -Wall -Wextra -Werror
+# FSANITIZE= -lpthread -fsanitize=thread -g
 SRC= main.c		\
 	 philo_atoi.c	\
 
