@@ -29,7 +29,9 @@ typedef struct s_data
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	print_mutex;
 	pthread_mutex_t	death_mutex;
-	pthread_mutex_t	meal_check_mutex;
+	pthread_mutex_t	times_ate_mutex;
+	pthread_mutex_t	last_meal_mutex;
+	pthread_mutex_t	all_ate_mutex;
 }	t_data;
 
 typedef struct s_philo
@@ -52,6 +54,5 @@ typedef struct s_cs
 
 int	ft_atoi(const char *nptr);
 void	free_all(t_data *data, t_philo *philos);
-void	free_philos(t_philo *philos);
 
 #endif
