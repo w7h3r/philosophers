@@ -44,7 +44,5 @@ int	ft_atoi(const char *nptr)
 		result = result * 10 + (nptr[i] - '0');
 		i++;
 	}
-	if (nptr[i] != '\0')
-		return (-1);
 	return ((int)result * sign);
 }

@@ -17,7 +17,24 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-void	join_threads(t_data *data, t_philo *philos);
+int	isnan(const char *str)
+{
+	int	i;
+
+	i = 0;
+	if (str[i] == '+' || str[i] == '-')
+		i++;
+	if (str[i] == '\0')
+		return (1);
+	while (str[i])
+	{
+		if (str[i] < '0' || str[i] > '9')
+			return (1);
+		i++;
+	}
+	return (0);
+}
+
 int	parse_arguments(int argc, char **argv, t_data *data)
 {
 	data->philosopher_num = ft_atoi(argv[1]);
@@ -35,11 +52,15 @@ int	parse_arguments(int argc, char **argv, t_data *data)
 		printf("Error: Invalid argument values\n");
 		return (1);
 	}
+	if (isnan(argv[1]) || isnan(argv[2]) || isnan(argv[3])
+		|| isnan(argv[4]) || (argc == 6 && isnan(argv[5])))
+	{
+		printf("Error: Arguments must be positive integers\n");
+		return (1);
+	}
+	data->time_to_think = set_think_time(data);
 	return (0);
 }
-
-int	should_sim_stop(t_data *data);
-long long	get_time(void);
 
 void	print_status(t_data *data, int id, char *status)
 {
@@ -71,9 +92,12 @@ void	free_mutexes(t_data *data)
 	}
 	pthread_mutex_destroy(&data->print_mutex);
 	pthread_mutex_destroy(&data->death_mutex);
-	i = 0;
-	while (i < data->philosopher_num)
-		pthread_mutex_destroy(&data->philos[i++].last_meal_mutex);
+	if (data->philos)
+	{
+		i = 0;
+		while (i < data->philosopher_num)
+			pthread_mutex_destroy(&data->philos[i++].last_meal_mutex);
+	}
 	pthread_mutex_destroy(&data->times_ate_mutex);
 	pthread_mutex_destroy(&data->all_ate_mutex);
 }
@@ -96,7 +120,7 @@ int	should_sim_stop(t_data *data)
 	return (!status);
 }
 
-void	my_sleep(long long time_in_ms)
+void	my_sleep(long long time_in_ms, t_data *data)
 {
 	long long	current_time;
 	long long	remaining_time;
@@ -105,6 +129,8 @@ void	my_sleep(long long time_in_ms)
 	estimated_end_time = get_time() + time_in_ms;
 	while (1)
 	{
+		if (should_sim_stop(data) == 1)
+			break ;
 		current_time = get_time();
 		if (current_time >= estimated_end_time)
 			break ;
@@ -112,9 +138,6 @@ void	my_sleep(long long time_in_ms)
 		usleep(200);
 	}
 }
-
-int	philo_take_forks(t_philo *philo);
-int	philo_put_down_forks(t_philo *philo);
 
 int	philo_eat(t_philo *philo)
 {
@@ -130,7 +153,7 @@ int	philo_eat(t_philo *philo)
 	pthread_mutex_lock(&philo->last_meal_mutex);
 	philo->last_meal_time = get_time();
 	pthread_mutex_unlock(&philo->last_meal_mutex);
-	my_sleep(data->time_to_eat);
+	my_sleep(data->time_to_eat, data);
 	pthread_mutex_lock(&data->times_ate_mutex);
 	philo->times_ate++;
 	curr_ate_num = philo->times_ate;
@@ -153,69 +176,34 @@ int	philo_sleep(t_philo *philo)
 	if (should_sim_stop(data) == 1)
 		return (1);
 	print_status(data, philo->id, "is sleeping");
-	my_sleep(data->time_to_sleep);
+	my_sleep(data->time_to_sleep, data);
 	return (should_sim_stop(data));
 }
 
-// int	philo_think(t_philo *philo)
-// {
-// 	t_data	*data;
-// 	long long think_time;
-//
-// 	data = philo->data;
-// 	if (should_sim_stop(data) == 1)
-// 		return (1);
-// 	print_status(data, philo->id, "is thinking");
-// 	think_time = data->time_to_die - (data->time_to_sleep + data->time_to_eat);
-// 	if (think_time > 10)
-// 		think_time = (think_time * 3) / 4;
-// 	else
-// 		think_time = 1;
-// 	my_sleep(think_time);
-// 	return (should_sim_stop(data));
-// }
+long long	set_think_time(t_data *data)
+{
+	long long	think_time;
+
+	think_time = data->time_to_die - (data->time_to_sleep + data->time_to_eat);
+	if (think_time > 10)
+		think_time = (think_time * 3) / 4;
+	else
+		think_time = 1;
+	return (think_time);
+}
 
 int	philo_think(t_philo *philo)
 {
-	t_data		*data;
-	long long	think_time;
-	long long	available_time;
-	long long	safety_margin;
+	t_data	*data;
 
 	data = philo->data;
 	if (should_sim_stop(data) == 1)
 		return (1);
 	print_status(data, philo->id, "is thinking");
-	
-	// Mevcut süre hesaplaması
-	available_time = data->time_to_die - (data->time_to_eat + data->time_to_sleep);
-	
-	// Büyük güvenlik marjı (sistem overhead için)
-	safety_margin = 100; // 100ms güvenlik
-	
-	if (available_time <= safety_margin)
-	{
-		think_time = 1; // Minimal think
-	}
-	else
-	{
-		// Çok konservatif hesaplama
-		think_time = (available_time - safety_margin) / 4; // Sadece %25'ini kullan
-		
-		// Tekliler için daha da konservatif
-		if (philo->id % 2 == 1)
-			think_time = think_time / 2;
-	}
-	
-	// Alt ve üst sınırlar
-	if (think_time < 1)
-		think_time = 1;
-	else if (think_time > 50) // Maksimum 50ms
-		think_time = 50;
-		
-	my_sleep(think_time);
+	my_sleep(data->time_to_think, data);
 	return (should_sim_stop(data));
 }
+
 int	philo_take_forks(t_philo *philo)
 {
 	t_data	*data;
@@ -236,6 +224,11 @@ int	philo_take_forks(t_philo *philo)
 	if (should_sim_stop(data) == 1)
 		return (1);
 	pthread_mutex_lock(&data->forks[f_fork]);
+	if (should_sim_stop(data) == 1)
+	{
+		pthread_mutex_unlock(&data->forks[f_fork]);
+		return (1);
+	}
 	print_status(data, philo->id, "has taken a fork");
 	if (should_sim_stop(data) == 1)
 	{
@@ -248,6 +241,12 @@ int	philo_take_forks(t_philo *philo)
 		return (1);
 	}
 	pthread_mutex_lock(&data->forks[s_fork]);
+	if (should_sim_stop(data) == 1)
+	{
+		pthread_mutex_unlock(&data->forks[f_fork]);
+		pthread_mutex_unlock(&data->forks[s_fork]);
+		return (1);
+	}
 	print_status(data, philo->id, "has taken a fork");
 	if (should_sim_stop(data) == 1)
 	{
@@ -286,11 +285,31 @@ int	get_life_status(t_data *data)
 	return (status);
 }
 
+int	philo_live(t_philo *philo, t_data *data)
+{
+	int		curr_ate_num;
+
+	if (philo_eat(philo) == 1)
+		return (1);
+	if (data->philosopher_must_eat_num != -1)
+	{
+		pthread_mutex_lock(&data->times_ate_mutex);
+		curr_ate_num = philo->times_ate;
+		pthread_mutex_unlock(&data->times_ate_mutex);
+		if (curr_ate_num >= data->philosopher_must_eat_num)
+			return (1);
+	}
+	if (philo_sleep(philo) == 1)
+		return (1);
+	if (philo_think(philo) == 1)
+		return (1);
+	return (0);
+}
+
 void	*philo_routine(void *arg)
 {
 	t_data	*data;
 	t_philo	*philo;
-	int		curr_ate_num;
 
 	philo = (t_philo *)arg;
 	data = philo->data;
@@ -300,26 +319,13 @@ void	*philo_routine(void *arg)
 	philo->last_meal_time = get_time();
 	pthread_mutex_unlock(&philo->last_meal_mutex);
 	if (philo->id % 2 == 0)
-		my_sleep(data->time_to_eat / 10);
-	if (philo->id == data->philosopher_num && data->philosopher_num % 2 == 1 && data->philosopher_num != 1)
-		my_sleep(data->time_to_eat + data->time_to_sleep / 2);
+		my_sleep(data->time_to_eat / 10, data);
+	if (philo->id == data->philosopher_num
+		&& data->philosopher_num % 2 == 1 && data->philosopher_num != 1)
+		my_sleep(data->time_to_eat + data->time_to_sleep / 2, data);
 	while (should_sim_stop(data) == 0)
-	{
-		if (philo_eat(philo) == 1)
+		if (philo_live(philo, data) == 1)
 			break ;
-		if (data->philosopher_must_eat_num != -1)
-		{
-			pthread_mutex_lock(&data->times_ate_mutex);
-			curr_ate_num = philo->times_ate;
-			pthread_mutex_unlock(&data->times_ate_mutex);
-			if (curr_ate_num >= data->philosopher_must_eat_num)
-				break ;
-		}
-		if (philo_sleep(philo) == 1)
-			break ;
-		if (philo_think(philo) == 1)
-			break ;
-	}
 	return ((void *)0);
 }
 
@@ -403,9 +409,14 @@ int	init_forks(t_data *data)
 	return (0);
 }
 
-static int	init(t_data *data, t_philo **philos, int argc, char **argv)
+int	init(t_data *data, t_philo **philos, int argc, char **argv)
 {
 	data->life = 0;
+	if (parse_arguments(argc, argv, data) == 1)
+	{
+		free_all(data, NULL);
+		return (1);
+	}
 	if (pthread_mutex_init(&data->print_mutex, NULL) != 0)
 	{
 		free_all(data, NULL);
@@ -422,11 +433,6 @@ static int	init(t_data *data, t_philo **philos, int argc, char **argv)
 		return (1);
 	}
 	if (pthread_mutex_init(&data->all_ate_mutex, NULL) != 0)
-	{
-		free_all(data, NULL);
-		return (1);
-	}
-	if (parse_arguments(argc, argv, data) == 1)
 	{
 		free_all(data, NULL);
 		return (1);
@@ -488,7 +494,7 @@ void	philo_monitor(t_data *data, t_philo *philos)
 			current_time = get_time();
 			last_meal_time = get_philo_last_meal_time(&philos[i]);
 			time_diff = current_time - last_meal_time;
-			if (time_diff >= data->time_to_die)
+			if (time_diff > data->time_to_die)
 			{
 				pthread_mutex_lock(&data->print_mutex);
 				pthread_mutex_lock(&data->death_mutex);

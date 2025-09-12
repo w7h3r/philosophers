@@ -22,6 +22,7 @@ typedef struct s_data
 	int				time_to_die;
 	int				time_to_eat;
 	int				time_to_sleep;
+	int				time_to_think;
 	int				philosopher_must_eat_num;
 	long long		start_time;
 	int				all_ate;
@@ -54,5 +55,29 @@ typedef struct s_cs
 
 int	ft_atoi(const char *nptr);
 void	free_all(t_data *data, t_philo *philos);
+void	join_threads(t_data *data, t_philo *philos);
+void	philo_monitor(t_data *data, t_philo *philos);
+long long	get_philo_last_meal_time(t_philo *philo);
+int	has_everyone_eaten(t_data *data);
+int	init(t_data *data, t_philo **philos, int argc, char **argv);
+int	init_forks(t_data *data);
+void	destroy_forks(t_data *data);
+int	init_philos(t_data *data, t_philo **philo);
+void	free_all(t_data *data, t_philo *philos);
+void	*philo_routine(void *arg);
+int	get_life_status(t_data *data);
+int	philo_put_down_forks(t_philo *philo);
+int	philo_take_forks(t_philo *philo);
+int	philo_think(t_philo *philo);
+long long	set_think_time(t_data *data);
+int	philo_sleep(t_philo *philo);
+int	philo_eat(t_philo *philo);
+void	my_sleep(long long time_in_ms, t_data *data);
+int	should_sim_stop(t_data *data);
+long long	get_time(void);
+void	free_mutexes(t_data *data);
+void	print_status(t_data *data, int id, char *status);
+int	parse_arguments(int argc, char **argv, t_data *data);
+
 
 #endif
