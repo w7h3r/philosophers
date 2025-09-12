@@ -30,7 +30,6 @@ typedef struct s_data
 	pthread_mutex_t	print_mutex;
 	pthread_mutex_t	death_mutex;
 	pthread_mutex_t	times_ate_mutex;
-	pthread_mutex_t	last_meal_mutex;
 	pthread_mutex_t	all_ate_mutex;
 }	t_data;
 
@@ -40,6 +39,7 @@ typedef struct s_philo
 	int				left_fork;
 	int				right_fork;
 	long long		last_meal_time;
+	pthread_mutex_t	last_meal_mutex;
 	int				times_ate;
 	t_data			*data;
 	pthread_t		thread;

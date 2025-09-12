@@ -1,7 +1,7 @@
 NAME= philo
 CC= cc
 CFLAGS= -Wall -Wextra -Werror
-# FSANITIZE= -lpthread -fsanitize=thread -g
+FSANITIZE= -lpthread -fsanitize=thread -g
 SRC= main.c		\
 	 philo_atoi.c	\
 
@@ -10,7 +10,7 @@ OBJ= $(SRC:.c=.o)
 all: $(NAME)
 
 $(NAME): $(OBJ) 
-	$(CC) $(OBJ) $(CFLAGS) -o $(NAME)
+	$(CC) $(OBJ) $(CFLAGS) $(FSANITIZE) -o $(NAME)
 
 clean:
 	rm -rf $(OBJ)
