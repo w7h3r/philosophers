@@ -6,7 +6,7 @@
 /*   By: muokcan <muokcan@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 17:09:15 by muokcan           #+#    #+#             */
-/*   Updated: 2025/08/27 19:26:43 by muokcan          ###   ########.fr       */
+/*   Updated: 2025/09/13 17:31:35 by muokcan          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,37 +47,33 @@ typedef struct s_philo
 	struct s_philo	*next;
 }	t_philo;
 
-typedef struct s_cs
-{
-	void			*data;
-	pthread_mutex_t	*mutex;
-}	t_cs;
-
-int	ft_atoi(const char *nptr);
-void	free_all(t_data *data, t_philo *philos);
-void	join_threads(t_data *data, t_philo *philos);
-void	philo_monitor(t_data *data, t_philo *philos);
+int			ft_atoi(const char *nptr);
+void		free_all(t_data *data, t_philo *philos);
+void		join_threads(t_data *data, t_philo *philos);
+void		philo_monitor(t_data *data, t_philo *philos);
 long long	get_philo_last_meal_time(t_philo *philo);
-int	has_everyone_eaten(t_data *data);
-int	init(t_data *data, t_philo **philos, int argc, char **argv);
-int	init_forks(t_data *data);
-void	destroy_forks(t_data *data);
-int	init_philos(t_data *data, t_philo **philo);
-void	free_all(t_data *data, t_philo *philos);
-void	*philo_routine(void *arg);
-int	get_life_status(t_data *data);
-int	philo_put_down_forks(t_philo *philo);
-int	philo_take_forks(t_philo *philo);
-int	philo_think(t_philo *philo);
+int			has_everyone_eaten(t_data *data);
+int			init(t_data *data, t_philo **philos, int argc, char **argv);
+int			init_forks(t_data *data);
+void		destroy_forks(t_data *data);
+int			init_philos(t_data *data, t_philo **philo);
+void		free_all(t_data *data, t_philo *philos);
+void		*philo_routine(void *arg);
+int			get_life_status(t_data *data);
+int			philo_put_down_forks(t_philo *philo);
+int			philo_take_forks(t_philo *philo);
+int			philo_think(t_philo *philo);
 long long	set_think_time(t_data *data);
-int	philo_sleep(t_philo *philo);
-int	philo_eat(t_philo *philo);
-void	my_sleep(long long time_in_ms, t_data *data);
-int	should_sim_stop(t_data *data);
+int			philo_sleep(t_philo *philo);
+int			philo_eat(t_philo *philo);
+void		my_sleep(long long time_in_ms, t_data *data);
+int			should_sim_stop(t_data *data);
 long long	get_time(void);
-void	free_mutexes(t_data *data);
-void	print_status(t_data *data, int id, char *status);
-int	parse_arguments(int argc, char **argv, t_data *data);
-
+void		free_mutexes(t_data *data);
+void		print_status(t_data *data, int id, char *status);
+int			parse_arguments(int argc, char **argv, t_data *data);
+int			free_all_and_return(t_data *data, t_philo *philos, int code);
+int			get_first_fork_id(t_philo *philo);
+int			get_second_fork_id(t_philo *philo);
 
 #endif

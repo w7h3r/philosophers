@@ -2,8 +2,18 @@ NAME= philo
 CC= cc
 CFLAGS= -Wall -Wextra -Werror
 FSANITIZE= #-lpthread -fsanitize=thread -g
-SRC= main.c		\
+SRC= main.c			\
 	 philo_atoi.c	\
+	 actions.c		\
+	 arg_parse.c 	\
+	 clear.c		\
+	 forks.c 		\
+	 init.c 		\
+	 monitor.c 		\
+	 print.c 		\
+	 routine.c 		\
+	 time.c 		\
+	 utils.c
 
 OBJ= $(SRC:.c=.o)
 

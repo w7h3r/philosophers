@@ -1,34 +1,31 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   print.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: muokcan <muokcan@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/08/24 17:09:09 by muokcan           #+#    #+#             */
-/*   Updated: 2025/09/13 17:27:33 by muokcan          ###   ########.fr       */
+/*   Created: 2025/09/13 17:21:26 by muokcan           #+#    #+#             */
+/*   Updated: 2025/09/13 17:21:46 by muokcan          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 #include <stdio.h>
 
-int	main(int argc, char **argv)
+void	print_status(t_data *data, int id, char *status)
 {
-	t_data	data;
-	t_philo	*philos;
+	int	current_life_status;
 
-	if (argc < 5 || argc > 6)
+	pthread_mutex_lock(&data->print_mutex);
+	pthread_mutex_lock(&data->death_mutex);
+	current_life_status = data->life;
+	pthread_mutex_unlock(&data->death_mutex);
+	if (!current_life_status && status[0] != 'd')
 	{
-		printf("Error: Invalid number/pattern of arguments\nUsage: \
-				./philo philo_number time_to_die time_to_eat time_to_sleep \
-				[number_of_times_each_philosopher_must_eat]\n");
-		return (1);
+		pthread_mutex_unlock(&data->print_mutex);
+		return ;
 	}
-	if (init(&data, &philos, argc, argv) == 1)
-		return (1);
-	philo_monitor(&data, philos);
-	join_threads(&data, philos);
-	free_all(&data, philos);
-	return (0);
+	printf("%lld %d %s\n", get_time() - data->start_time, id, status);
+	pthread_mutex_unlock(&data->print_mutex);
 }
