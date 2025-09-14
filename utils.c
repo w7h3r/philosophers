@@ -24,15 +24,15 @@ int	should_sim_stop(t_data *data)
 
 int	get_first_fork_id(t_philo *philo)
 {
-	if (philo->id % 2 == 0)
-		return (philo->right_fork);
-	else
+	if (philo->left_fork < philo->right_fork)
 		return (philo->left_fork);
+	else
+		return (philo->right_fork);
 }
 
 int	get_second_fork_id(t_philo *philo)
 {
-	if (philo->id % 2 == 0)
+	if (philo->left_fork > philo->right_fork)
 		return (philo->left_fork);
 	else
 		return (philo->right_fork);

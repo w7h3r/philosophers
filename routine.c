@@ -56,7 +56,7 @@ void	*philo_routine(void *arg)
 	philo->last_meal_time = get_time();
 	pthread_mutex_unlock(&philo->last_meal_mutex);
 	if (philo->id % 2 == 0)
-		my_sleep(data->time_to_eat / 10, data);
+		my_sleep(data->time_to_eat / 2, data);
 	if (philo->id == data->philosopher_num
 		&& data->philosopher_num % 2 == 1 && data->philosopher_num != 1)
 		my_sleep(data->time_to_eat / 2, data);

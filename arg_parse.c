@@ -45,13 +45,13 @@ int	parse_arguments(int argc, char **argv, t_data *data)
 		|| data->time_to_eat < 0 || data->time_to_sleep < 0
 		|| (argc == 6 && data->philosopher_must_eat_num < 0))
 	{
-		printf("Error: Invalid argument values\n");
+		printf(VALUE_ERROR);
 		return (1);
 	}
 	if (isnan(argv[1]) || isnan(argv[2]) || isnan(argv[3])
 		|| isnan(argv[4]) || (argc == 6 && isnan(argv[5])))
 	{
-		printf("Error: Arguments must be positive integers\n");
+		printf(VALUE_ERROR);
 		return (1);
 	}
 	data->time_to_think = set_think_time(data);

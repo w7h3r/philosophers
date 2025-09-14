@@ -29,7 +29,10 @@ void	init_philo_values(t_data *data, t_philo *philo, int i)
 	philo[i].id = i + 1;
 	philo[i].times_ate = 0;
 	philo[i].left_fork = i;
-	philo[i].right_fork = (i + 1) % data->philosopher_num;
+	if (data->philosopher_num == 1)
+		philo[i].right_fork = i;
+	else
+		philo[i].right_fork = (i + 1) % data->philosopher_num;
 	philo[i].data = data;
 	philo[i].last_meal_time = get_time();
 }
@@ -71,7 +74,7 @@ int	init_forks(t_data *data)
 	{
 		if (pthread_mutex_init(&data->forks[i], NULL) != 0)
 		{
-			destroy_forks(data);
+			destroy_forks(data, i);
 			return (1);
 		}
 		i++;

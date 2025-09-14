@@ -20,9 +20,8 @@ int	main(int argc, char **argv)
 
 	if (argc < 5 || argc > 6)
 	{
-		printf("Error: Invalid number/pattern of arguments\nUsage: \
-				./philo philo_number time_to_die time_to_eat time_to_sleep \
-				[number_of_times_each_philosopher_must_eat]\n");
+		printf(VALUE_ERROR);
+		printf(USAGE_MSG);
 		return (1);
 	}
 	if (init(&data, &philos, argc, argv) == 1)

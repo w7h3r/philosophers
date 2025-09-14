@@ -25,33 +25,27 @@ long long	get_time(void)
 long long	set_think_time(t_data *data)
 {
 	long long	think_time;
-	long long	safety_time;
 
 	think_time = data->time_to_die - (data->time_to_sleep + data->time_to_eat);
-	if (think_time < 10)
-		return (1);
+	if (think_time <= 5)
+		return (0);
 	if (data->philosopher_num > 100)
-		safety_time = think_time / 8;
+		return (think_time / 10);
+	else if (data->philosopher_num > 50)
+		return (think_time / 6);
 	else
-		safety_time = think_time / 4;
-	return (think_time - safety_time);
+		return (think_time / 3);
 }
 
 void	my_sleep(long long time_in_ms, t_data *data)
 {
-	long long	current_time;
-	long long	remaining_time;
-	long long	estimated_end_time;
+	long long	start_time;
 
-	estimated_end_time = get_time() + time_in_ms;
-	while (1)
+	start_time = get_time();
+	while (get_time() - start_time < time_in_ms)
 	{
 		if (should_sim_stop(data) == 1)
 			break ;
-		current_time = get_time();
-		if (current_time >= estimated_end_time)
-			break ;
-		remaining_time = estimated_end_time - current_time;
-		usleep(100);
+		usleep(500);
 	}
 }

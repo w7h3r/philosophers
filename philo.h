@@ -15,6 +15,11 @@
 
 # include <pthread.h>
 
+# define VALUE_ERROR "Error: Arguments must be positive integers\n"
+# define USAGE_ERROR "Error: Invalid number/pattern of arguments\n"
+# define USAGE_MSG "Usage: ./philo philo_number time_to_die time_to_eat time_to_sleep \
+[number_of_times_each_philosopher_must_eat]\n"
+
 typedef struct s_data
 {
 	int				life;
@@ -44,7 +49,6 @@ typedef struct s_philo
 	int				times_ate;
 	t_data			*data;
 	pthread_t		thread;
-	struct s_philo	*next;
 }	t_philo;
 
 int			ft_atoi(const char *nptr);
@@ -55,7 +59,7 @@ long long	get_philo_last_meal_time(t_philo *philo);
 int			has_everyone_eaten(t_data *data);
 int			init(t_data *data, t_philo **philos, int argc, char **argv);
 int			init_forks(t_data *data);
-void		destroy_forks(t_data *data);
+void		destroy_forks(t_data *data, int remaining_forks);
 int			init_philos(t_data *data, t_philo **philo);
 void		free_all(t_data *data, t_philo *philos);
 void		*philo_routine(void *arg);

@@ -23,16 +23,13 @@ void	free_all(t_data *data, t_philo *philos)
 	}
 }
 
-void	destroy_forks(t_data *data)
+void	destroy_forks(t_data *data, int remaining_forks)
 {
 	int	i;
 
-	i = 0;
-	while (i < data->philosopher_num)
-	{
+	i = remaining_forks;
+	while (i-- > 0)
 		pthread_mutex_destroy(&data->forks[i]);
-		i++;
-	}
 	free(data->forks);
 }
 

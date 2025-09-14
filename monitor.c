@@ -57,12 +57,11 @@ void	philo_monitor(t_data *data, t_philo *philos)
 {
 	long long	current_time;
 	long long	last_meal_time;
-	long long	time_diff;
 	int			i;
 
-	usleep(1000);
-	data->life = 1;
 	data->start_time = get_time();
+	data->life = 1;
+	usleep(100);
 	while (should_sim_stop(data) == 0)
 	{
 		i = 0;
@@ -70,12 +69,15 @@ void	philo_monitor(t_data *data, t_philo *philos)
 		{
 			current_time = get_time();
 			last_meal_time = get_philo_last_meal_time(&philos[i]);
-			time_diff = current_time - last_meal_time;
-			if (time_diff > data->time_to_die)
+			if (current_time - last_meal_time >= data->time_to_die)
 				return (philo_death(data, &philos[i]));
 			i++;
 		}
 		if (has_everyone_eaten(data) == 1)
 			return (philo_ate_enough(data));
+		if (data->philosopher_num > 100)
+			usleep(100);
+		else
+			usleep(200);
 	}
 }
