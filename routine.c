@@ -50,8 +50,13 @@ void	*philo_routine(void *arg)
 
 	philo = (t_philo *)arg;
 	data = philo->data;
-	while (get_life_status(data) == 0)
-		;
+	pthread_mutex_lock(&data->death_mutex);
+	if (data->life == 0)
+	{
+		pthread_mutex_unlock(&data->death_mutex);
+		return (NULL);
+	}
+	pthread_mutex_unlock(&data->death_mutex);
 	pthread_mutex_lock(&philo->last_meal_mutex);
 	philo->last_meal_time = get_time();
 	pthread_mutex_unlock(&philo->last_meal_mutex);

@@ -9,6 +9,7 @@ SRC= main.c			\
 	 clear.c		\
 	 forks.c 		\
 	 init.c 		\
+	 init_utils.c 	\
 	 monitor.c 		\
 	 print.c 		\
 	 routine.c 		\

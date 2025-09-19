@@ -6,7 +6,7 @@
 /*   By: muokcan <muokcan@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/13 16:37:02 by muokcan           #+#    #+#             */
-/*   Updated: 2025/09/13 17:32:19 by muokcan          ###   ########.fr       */
+/*   Updated: 2025/09/14 19:10:13 by muokcan          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,16 +28,6 @@ int	has_everyone_eaten(t_data *data)
 	return (all_ate);
 }
 
-long long	get_philo_last_meal_time(t_philo *philo)
-{
-	long long	last_meal_time;
-
-	pthread_mutex_lock(&philo->last_meal_mutex);
-	last_meal_time = philo->last_meal_time;
-	pthread_mutex_unlock(&philo->last_meal_mutex);
-	return (last_meal_time);
-}
-
 void	philo_death(t_data *data, t_philo *philo)
 {
 	pthread_mutex_lock(&data->death_mutex);
@@ -53,31 +43,33 @@ void	philo_ate_enough(t_data *data)
 	pthread_mutex_unlock(&data->death_mutex);
 }
 
-void	philo_monitor(t_data *data, t_philo *philos)
+void	pre_monitor(t_data *data)
+{
+	usleep(100);
+	data->start_time = get_time();
+	data->life = 1;
+	pthread_mutex_unlock(&data->death_mutex);
+}
+
+void	philo_monitor(t_data *data)
 {
 	long long	current_time;
 	long long	last_meal_time;
 	int			i;
 
-	data->start_time = get_time();
-	data->life = 1;
-	usleep(100);
+	pre_monitor(data);
 	while (should_sim_stop(data) == 0)
 	{
 		i = 0;
 		while (i < data->philosopher_num)
 		{
 			current_time = get_time();
-			last_meal_time = get_philo_last_meal_time(&philos[i]);
+			last_meal_time = get_philo_last_meal_time(&data->philos[i]);
 			if (current_time - last_meal_time >= data->time_to_die)
-				return (philo_death(data, &philos[i]));
+				return (philo_death(data, &data->philos[i]));
 			i++;
 		}
 		if (has_everyone_eaten(data) == 1)
 			return (philo_ate_enough(data));
-		if (data->philosopher_num > 100)
-			usleep(100);
-		else
-			usleep(200);
 	}
 }

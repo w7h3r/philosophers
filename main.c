@@ -16,7 +16,6 @@
 int	main(int argc, char **argv)
 {
 	t_data	data;
-	t_philo	*philos;
 
 	if (argc < 5 || argc > 6)
 	{
@@ -24,10 +23,10 @@ int	main(int argc, char **argv)
 		printf(USAGE_MSG);
 		return (1);
 	}
-	if (init(&data, &philos, argc, argv) == 1)
+	if (init(&data, argc, argv) == 1)
 		return (1);
-	philo_monitor(&data, philos);
-	join_threads(&data, philos);
-	free_all(&data, philos);
+	philo_monitor(&data);
+	join_threads(&data);
+	free_all(&data);
 	return (0);
 }
